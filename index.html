@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ventas | Data Analytics</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232B59FF'/%3E%3Crect x='7' y='15' width='4' height='10' rx='1.5' fill='white'/%3E%3Crect x='14' y='8' width='4' height='17' rx='1.5' fill='white'/%3E%3Crect x='21' y='12' width='4' height='13' rx='1.5' fill='white'/%3E%3C/svg%3E">
+
+  <!-- Tipografía: si no hay internet, el navegador usa la fuente del sistema -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================
+       TOKENS
+       ========================================================== */
+    :root {
+      --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+      --font-ui: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+      --rail-w: 280px;
+      --rail-w-collapsed: 80px;
+
+      --bg: #EDF1F7;
+      --surface: #FFFFFF;
+      --ink: #101A33;
+      --muted: #5B6786;
+      --line: #D9E0EC;
+      --accent: #2B59FF;
+      --accent-ink: #FFFFFF;
+      --accent-soft: #E4EAFF;
+      --live: #0E9F7E;
+      --live-soft: #DCF5EE;
+      --warn: #B54708;
+      --shadow: rgba(24, 44, 120, .38);
+
+      --rail: #101A33;
+      --rail-ink: #C4CEEA;
+      --rail-muted: #8C99BD;
+      --rail-active: #1E2D57;
+      --rail-line: #22305A;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #0C1226;
+      --surface: #131B34;
+      --ink: #E7ECFA;
+      --muted: #98A4C4;
+      --line: #24305A;
+      --accent: #7B97FF;
+      --accent-ink: #0C1226;
+      --accent-soft: #1D2850;
+      --live: #3DD6AE;
+      --live-soft: #123A3A;
+      --warn: #F4A261;
+      --shadow: rgba(0, 0, 0, .65);
+
+      --rail: #0A0F20;
+      --rail-ink: #A7B3D6;
+      --rail-muted: #7683A8;
+      --rail-active: #19234A;
+      --rail-line: #1A2547;
+    }
+
+    /* ==========================================================
+       BASE
+       ========================================================== */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { color-scheme: light; }
+    html[data-theme="dark"] { color-scheme: dark; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-ui);
+      font-size: 15px;
+      line-height: 1.45;
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, a, input { font: inherit; }
+    button { cursor: pointer; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    h1, h2, p { margin: 0; }
+
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ==========================================================
+       ESTRUCTURA
+       ========================================================== */
+    .app {
+      display: grid;
+      grid-template-columns: var(--rail-w) minmax(0, 1fr);
+      height: 100vh;
+      height: 100dvh;
+      transition: grid-template-columns .28s cubic-bezier(.3, .7, .2, 1);
+    }
+    .app.is-collapsed { grid-template-columns: var(--rail-w-collapsed) minmax(0, 1fr); }
+
+    /* ---------- Riel lateral ---------- */
+    .rail {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 20px 14px 16px;
+      background: var(--rail);
+      color: var(--rail-ink);
+      overflow: hidden;
+      z-index: 30;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 6px; min-height: 44px; }
+    .brand-mark {
+      flex: none; width: 40px; height: 40px; border-radius: 12px;
+      display: grid; place-items: center;
+      background: var(--accent); color: var(--accent-ink);
+    }
+    :root[data-theme="light"] .brand-mark { color: #fff; }
+    .brand-mark svg { width: 23px; height: 23px; }
+    .brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.1; }
+    .brand-name {
+      font-family: var(--font-display);
+      font-weight: 700; font-size: 26px; letter-spacing: -.025em;
+      color: #fff; white-space: nowrap;
+    }
+    .brand-sub {
+      margin-top: 4px;
+      font-family: var(--font-display);
+      font-weight: 600; font-size: 13px; letter-spacing: .06em;
+      color: var(--rail-muted); white-space: nowrap;
+    }
+
+    .search { position: relative; }
+    .search svg {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      width: 18px; height: 18px; color: var(--rail-muted); pointer-events: none;
+    }
+    .search input {
+      width: 100%; height: 40px; padding: 0 12px 0 40px;
+      border-radius: 12px; border: 1px solid var(--rail-line);
+      background: transparent; color: #fff;
+    }
+    .search input::placeholder { color: var(--rail-muted); }
+    .search input:hover { border-color: var(--rail-muted); }
+
+    .nav-scroll {
+      flex: 1 1 auto; min-height: 0;
+      overflow-y: auto; overscroll-behavior: contain;
+      margin: 0 -8px; padding: 0 8px;
+      scrollbar-width: thin; scrollbar-color: var(--rail-line) transparent;
+    }
+    .nav-group + .nav-group { margin-top: 14px; }
+    .nav-group-title { padding: 0 8px 6px; font-size: 13px; font-weight: 600; color: var(--rail-muted); white-space: nowrap; }
+    .nav-empty { padding: 8px; font-size: 14px; color: var(--rail-muted); }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 7px 10px; border-radius: 12px;
+      color: var(--rail-ink); text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .nav-item:hover { background: var(--rail-line); color: #fff; }
+    .nav-item[aria-current="page"] { background: var(--rail-active); color: #fff; }
+
+    .mono {
+      flex: none; width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: var(--rail-line); color: #fff;
+      font-family: var(--font-display); font-weight: 700; font-size: 12.5px; letter-spacing: .02em;
+      transition: background .15s, color .15s;
+    }
+    .nav-item[aria-current="page"] .mono { background: var(--accent); color: var(--accent-ink); }
+    :root[data-theme="light"] .nav-item[aria-current="page"] .mono { color: #fff; }
+
+    .nav-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+    .nav-text strong { font-weight: 600; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nav-text small { font-size: 12.5px; color: var(--rail-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .rail-foot {
+      display: flex; flex-direction: column; gap: 4px;
+      padding-top: 12px; border-top: 1px solid var(--rail-line);
+    }
+    .rail-btn {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; padding: 9px 12px; border: 0; border-radius: 12px;
+      background: transparent; color: var(--rail-ink); text-align: left;
+    }
+    .rail-btn:hover { background: var(--rail-line); color: #fff; }
+    .rail-btn svg { flex: none; width: 22px; height: 22px; }
+    .rail-btn span { white-space: nowrap; font-weight: 500; }
+
+    .signature { margin: 14px 8px 2px; }
+    .signature::before {
+      content: ""; display: block; width: 30px; height: 3px; margin-bottom: 10px;
+      border-radius: 3px; background: var(--accent);
+    }
+    .signature p {
+      font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: -.01em;
+      color: #fff; white-space: nowrap;
+    }
+
+    .icon-sun { display: none; }
+    :root[data-theme="dark"] .icon-sun { display: block; }
+    :root[data-theme="dark"] .icon-moon { display: none; }
+
+    .icon-collapse { transition: transform .28s; }
+    .app.is-collapsed .icon-collapse { transform: rotate(180deg); }
+
+    .scrim { display: none; }
+
+    /* ---------- Zona principal ---------- */
+    .main {
+      display: flex; flex-direction: column; gap: 18px;
+      min-width: 0; min-height: 0;
+      padding: 22px 26px 26px;
+    }
+
+    .top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .titles { flex: 1 1 260px; min-width: 0; }
+    .titles h1 {
+      font-family: var(--font-display);
+      font-weight: 700; font-size: 28px; line-height: 1.1; letter-spacing: -.025em;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .titles p { margin-top: 4px; color: var(--muted); font-size: 14.5px; }
+
+    .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .status {
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 34px; padding: 0 14px; border-radius: 999px;
+      background: var(--accent-soft); color: var(--ink);
+      font-size: 13.5px; font-weight: 500; white-space: nowrap;
+    }
+    .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .status[data-state="loading"] i { animation: latido 1.1s ease-in-out infinite; }
+    .status[data-state="ready"] { background: var(--live-soft); }
+    .status[data-state="ready"] i { background: var(--live); }
+    .status[data-state="error"] { background: transparent; box-shadow: inset 0 0 0 1.5px var(--warn); color: var(--warn); }
+    .status[data-state="error"] i { background: var(--warn); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      height: 40px; padding: 0 15px; border-radius: 12px;
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+      font-weight: 600; font-size: 14px; text-decoration: none; white-space: nowrap;
+      transition: border-color .15s, transform .15s, background .15s;
+    }
+    .btn:hover { border-color: var(--accent); }
+    .btn:active { transform: translateY(1px); }
+    .btn svg { width: 18px; height: 18px; flex: none; }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    :root[data-theme="light"] .btn-primary { color: #fff; }
+    .btn-primary:hover { filter: brightness(1.08); }
+
+    .menu-only { display: none; }
+
+    /* ---------- Marco del reporte ---------- */
+    .frame {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 380px;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      overflow: hidden;
+      box-shadow: 0 26px 48px -30px var(--shadow);
+    }
+
+    .frame iframe {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      border: 0;
+      opacity: 0;
+      transition: opacity .6s ease .1s;
+    }
+    .frame[data-state="ready"] iframe { opacity: 1; }
+
+    .frame::before {                       /* barra de progreso */
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 3px; z-index: 3;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      background-size: 40% 100%;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .frame[data-state="loading"]::before { opacity: 1; animation: barrido 1.3s ease-in-out infinite; }
+
+    .skeleton {
+      position: absolute; inset: 0; z-index: 2;
+      display: grid; gap: 16px; padding: 22px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: 92px minmax(0, 1fr) minmax(0, 1fr);
+      background: var(--surface);
+      transition: opacity .4s ease;
+    }
+    .skeleton span {
+      border-radius: 14px;
+      background: linear-gradient(100deg, var(--accent-soft) 30%, var(--surface) 50%, var(--accent-soft) 70%);
+      background-size: 220% 100%;
+      animation: brillo 1.6s linear infinite;
+    }
+    .skeleton .wide { grid-column: span 2; }
+    .skeleton .full { grid-column: 1 / -1; }
+    .frame:not([data-state="loading"]) .skeleton { opacity: 0; pointer-events: none; }
+
+    .error {
+      position: absolute; inset: 0; z-index: 4;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 24px; text-align: center; background: var(--surface);
+    }
+    .frame[data-state="error"] .error { display: flex; }
+    .error h2 { font-family: var(--font-display); font-size: 24px; letter-spacing: -.02em; }
+    .error p { max-width: 46ch; color: var(--muted); }
+    .error .btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+
+    .exit-fs {
+      position: absolute; top: 14px; right: 14px; z-index: 5;
+      padding: 9px 14px; border: 0; border-radius: 10px;
+      background: rgba(16, 26, 51, .88); color: #fff; font-weight: 600; font-size: 13.5px;
+    }
+    .exit-fs[hidden] { display: none; }
+
+    .frame:fullscreen { border-radius: 0; border: 0; box-shadow: none; }
+    .frame:-webkit-full-screen { border-radius: 0; border: 0; box-shadow: none; }
+
+    /* ---------- Aviso breve ---------- */
+    .toast {
+      position: fixed; left: 50%; bottom: 28px; z-index: 60;
+      transform: translate(-50%, 20px);
+      padding: 11px 18px; border-radius: 12px;
+      background: var(--ink); color: var(--bg);
+      font-weight: 600; font-size: 14px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+    }
+    .toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ==========================================================
+       ANIMACIONES
+       ========================================================== */
+    @keyframes latido { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.75); } }
+    @keyframes barrido { from { background-position: -60% 0; } to { background-position: 160% 0; } }
+    @keyframes brillo { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+
+    /* ==========================================================
+       RESPONSIVO
+       ========================================================== */
+    @media (min-width: 821px) {
+      /* menú contraído: solo iconos (en móvil el menú siempre va completo) */
+      .app.is-collapsed .brand-text,
+      .app.is-collapsed .search,
+      .app.is-collapsed .nav-group-title,
+      .app.is-collapsed .nav-text,
+      .app.is-collapsed .signature,
+      .app.is-collapsed .rail-btn span { display: none; }
+      .app.is-collapsed .brand { justify-content: center; padding: 0; }
+      .app.is-collapsed .nav-item,
+      .app.is-collapsed .rail-btn { justify-content: center; padding-inline: 0; }
+      .app.is-collapsed .nav-group + .nav-group { margin-top: 8px; }
+    }
+
+    @media (max-width: 1180px) {
+      .btn .lbl { display: none; }
+      .btn { width: 40px; padding: 0; }
+    }
+
+    @media (max-width: 820px) {
+      .app, .app.is-collapsed { grid-template-columns: minmax(0, 1fr); }
+
+      .rail {
+        position: fixed; inset: 0 auto 0 0; width: min(310px, 88vw);
+        transform: translateX(-102%);
+        transition: transform .28s cubic-bezier(.3, .7, .2, 1);
+      }
+      .app.menu-open .rail { transform: none; }
+      .app.menu-open .scrim {
+        display: block; position: fixed; inset: 0; z-index: 20;
+        background: rgba(8, 12, 28, .55);
+      }
+      .rail-btn.collapse-btn { display: none; }
+
+      .menu-only { display: inline-flex; }
+      .main { padding: 16px 14px 18px; gap: 14px; }
+      .titles h1 { font-size: 22px; }
+      .frame { min-height: 420px; border-radius: 16px; }
+      .status { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <noscript>Activa JavaScript en tu navegador para ver los reportes.</noscript>
+
+  <div class="app" id="app">
+
+    <!-- ===== Riel lateral ===== -->
+    <aside class="rail" id="rail" aria-label="Menú del portal">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.2" height="9" rx="1.4"/><rect x="9.9" y="3" width="4.2" height="18" rx="1.4"/><rect x="16.8" y="8" width="4.2" height="13" rx="1.4"/></svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Ventas</span>
+          <span class="brand-sub">Data Analytics</span>
+        </span>
+      </div>
+
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+        <input id="buscar" type="search" placeholder="Buscar reporte" aria-label="Buscar reporte" autocomplete="off" spellcheck="false">
+      </div>
+
+      <nav class="nav-scroll" aria-label="Reportes">
+        <div id="nav"></div>
+      </nav>
+
+      <div class="rail-foot">
+        <button class="rail-btn" id="btnTheme" type="button" aria-label="Cambiar tema">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <span>Cambiar tema</span>
+        </button>
+        <button class="rail-btn collapse-btn" id="btnCollapse" type="button" aria-label="Contraer menú">
+          <svg class="icon-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>
+          <span>Contraer menú</span>
+        </button>
+        <div class="signature"><p>Somos el Toro</p></div>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <!-- ===== Zona principal ===== -->
+    <main class="main">
+      <header class="top">
+        <button class="btn menu-only" id="btnMenu" type="button" aria-label="Abrir menú" title="Abrir menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+
+        <div class="titles">
+          <h1 id="titulo">Reporte</h1>
+          <p id="subtitulo"></p>
+        </div>
+
+        <div class="actions">
+          <span class="status" id="estado" data-state="loading" role="status"><i></i><span id="estadoTxt">Cargando reporte</span></span>
+
+          <button class="btn" id="btnRefresh" type="button" aria-label="Actualizar" title="Actualizar (tecla R)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+            <span class="lbl">Actualizar</span>
+          </button>
+
+          <a class="btn" id="btnOpen" href="#" target="_blank" rel="noopener" aria-label="Abrir en pestaña nueva" title="Abrir en pestaña nueva">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+            <span class="lbl">Abrir en pestaña nueva</span>
+          </a>
+
+          <button class="btn btn-primary" id="btnFull" type="button" aria-label="Pantalla completa" title="Pantalla completa (tecla F)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+            <span class="lbl">Pantalla completa</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="frame" id="frame" data-state="loading" aria-label="Reporte de Power BI">
+        <div class="skeleton" id="skeleton" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+          <span class="wide"></span><span class="wide"></span>
+          <span class="full"></span>
+        </div>
+
+        <iframe id="reporte" title="Reporte de Power BI" allowfullscreen></iframe>
+
+        <div class="error" id="error">
+          <h2>El reporte no cargó</h2>
+          <p>Revisa tu conexión y toca Actualizar. Si sigue igual, ábrelo en una pestaña nueva.</p>
+          <div class="btns">
+            <button class="btn btn-primary" id="btnRetry" type="button">Actualizar</button>
+            <a class="btn" id="btnOpenError" href="#" target="_blank" rel="noopener">Abrir en pestaña nueva</a>
+          </div>
+        </div>
+
+        <button class="exit-fs" id="btnExit" type="button" hidden>Salir de pantalla completa</button>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      /* ======================================================
+         CONFIGURACIÓN: aquí agregas, quitas o cambias reportes.
+         Para sumar otro, copia un bloque { ... } y pega su enlace.
+         - sigla: las 2 letras del cuadrito del menú
+         - grupo: bajo qué título aparece en el menú
+         - descripcion: texto pequeño opcional (se ve bajo el nombre)
+         ====================================================== */
+      const REPORTES = [
+        {
+          id: "colgate",
+          nombre: "Colgate",
+          sigla: "CG",
+          grupo: "Proveedores",
+          descripcion: "Requiere iniciar sesión en Power BI",
+          url: "https://app.powerbi.com/reportEmbed?reportId=ca5a72ab-8e82-4d3d-a04f-87b90c87288f&autoAuth=true&ctid=aa81b4e6-9e13-4514-b790-65ae246ef11f"
+        },
+        {
+          id: "morena",
+          nombre: "La Morena",
+          sigla: "LM",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiZmU0ODVhYjUtMDM5OS00OTI4LWIyNWYtYmFjZTkzNWEyNmJjIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "alen",
+          nombre: "Alen",
+          sigla: "AL",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiM2NhNjIxNTUtMzU4Ny00ZGViLWIyNzktZTNmMDAyZDdkNmQ2IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "kelloggs",
+          nombre: "Kelloggs",
+          sigla: "KE",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiNjA4NDJhNTEtZTFjNi00OGViLThhZWYtZDkwZDg1N2UxMDJiIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "unilever",
+          nombre: "Unilever",
+          sigla: "UN",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiY2Y5ZGEzNTItMmQzYy00MGNkLWFjYWEtYWMzNTNjMmNiODRlIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "pg",
+          nombre: "P&G",
+          sigla: "PG",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiMzIyYmE5NzAtNjgyMC00YTlhLTlmZDAtMDY4MTM0YWNiMTNjIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "rh-mj",
+          nombre: "RH y MJ",
+          sigla: "RM",
+          grupo: "Proveedores",
+          descripcion: "Reckitt Higiene y Mead Johnson",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiN2Y1ZTA2M2YtOTlhZi00N2U0LWExZjgtNTE0NDI4ZDgzODhjIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "flora",
+          nombre: "Flora",
+          sigla: "FL",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiNWFjN2QwY2EtYmEyMS00ZWViLTkwOTItOTBmNGJjYTY1OTE2IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "conagra",
+          nombre: "Conagra",
+          sigla: "CN",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiZTI5YjBlZTUtNjg3Ny00Yjg3LWEwZWYtNjQ1Njg1YzBiOGZhIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "johnson",
+          nombre: "Johnson",
+          sigla: "JO",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiZWQ5MGZiNjAtYmMzMS00ZDEwLWJmOWEtNjJlM2Q0MjZiYjZmIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "arcor",
+          nombre: "Arcor",
+          sigla: "AR",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiOTU3ZmIwYzUtMjA5MS00OGUwLThmZWUtYmY5NjRlOGMwNjZhIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "quala",
+          nombre: "Quala",
+          sigla: "QU",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiYTFlZDMxYWYtNDEzZi00NGU2LWIwY2ItNTgwNzllMWE3MGE5IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "la-botanera",
+          nombre: "La Botanera",
+          sigla: "LB",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiYzYyMjZhNTUtYTZkMy00ZGIyLTkwMDctMWMwZWU1ZmY1YjFiIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "softys",
+          nombre: "Softys",
+          sigla: "SO",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiZjVlMzMyNWUtMjA0MC00YmU4LTkzNDYtNWQzNDRhNmJjMTk1IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        }
+      ];
+
+      const TIEMPO_MAXIMO_MS = 25000;   // si el reporte tarda más, se muestra el aviso de error
+
+      /* ====================================================== */
+      const $ = (id) => document.getElementById(id);
+      const el = {
+        app: $("app"), nav: $("nav"), buscar: $("buscar"), frame: $("frame"), iframe: $("reporte"),
+        titulo: $("titulo"), subtitulo: $("subtitulo"),
+        estado: $("estado"), estadoTxt: $("estadoTxt"),
+        btnRefresh: $("btnRefresh"), btnRetry: $("btnRetry"), btnFull: $("btnFull"),
+        btnOpen: $("btnOpen"), btnOpenError: $("btnOpenError"), btnExit: $("btnExit"),
+        btnTheme: $("btnTheme"), btnCollapse: $("btnCollapse"), btnMenu: $("btnMenu"),
+        scrim: $("scrim"), toast: $("toast")
+      };
+
+      const memoria = {
+        leer(clave) { try { return localStorage.getItem(clave); } catch (e) { return null; } },
+        guardar(clave, valor) { try { localStorage.setItem(clave, valor); } catch (e) { /* sin almacenamiento */ } }
+      };
+
+      let actual = null;
+      let temporizador = null;
+      let avisarAlCargar = false;
+
+      /* ---------- Menú de reportes ---------- */
+      function normalizar(texto) {
+        return (texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      }
+
+      function dibujarMenu() {
+        const filtro = normalizar(el.buscar.value.trim());
+        el.nav.innerHTML = "";
+
+        const lista = REPORTES.filter((r) =>
+          !filtro || normalizar(r.nombre + " " + (r.descripcion || "") + " " + (r.grupo || "")).includes(filtro));
+
+        if (!lista.length) {
+          const p = document.createElement("p");
+          p.className = "nav-empty";
+          p.textContent = "No hay reportes con ese nombre. Borra la búsqueda para ver todos.";
+          el.nav.appendChild(p);
+          return;
+        }
+
+        const grupos = [];
+        lista.forEach((r) => {
+          const nombre = r.grupo || "Reportes";
+          let bloque = grupos.find((g) => g.nombre === nombre);
+          if (!bloque) { bloque = { nombre, items: [] }; grupos.push(bloque); }
+          bloque.items.push(r);
+        });
+
+        grupos.forEach((g) => {
+          const seccion = document.createElement("section");
+          seccion.className = "nav-group";
+          const titulo = document.createElement("h2");
+          titulo.className = "nav-group-title";
+          titulo.textContent = g.nombre;
+          seccion.appendChild(titulo);
+
+          const ul = document.createElement("ul");
+          g.items.forEach((rep) => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.className = "nav-item";
+            a.href = "#" + rep.id;
+            a.dataset.id = rep.id;
+            a.title = rep.nombre;
+            a.innerHTML = '<span class="mono" aria-hidden="true"></span>' +
+              '<span class="nav-text"><strong></strong><small></small></span>';
+            a.querySelector(".mono").textContent = rep.sigla || rep.nombre.slice(0, 2).toUpperCase();
+            a.querySelector("strong").textContent = rep.nombre;
+            const pequeno = a.querySelector("small");
+            if (rep.descripcion) pequeno.textContent = rep.descripcion; else pequeno.remove();
+            a.addEventListener("click", (e) => {
+              if (actual && actual.id === rep.id) e.preventDefault();   // ya está abierto
+              cerrarMenuMovil();
+            });
+            li.appendChild(a);
+            ul.appendChild(li);
+          });
+          seccion.appendChild(ul);
+          el.nav.appendChild(seccion);
+        });
+
+        marcarMenu();
+      }
+
+      function marcarMenu() {
+        el.nav.querySelectorAll(".nav-item").forEach((a) => {
+          if (actual && a.dataset.id === actual.id) a.setAttribute("aria-current", "page");
+          else a.removeAttribute("aria-current");
+        });
+      }
+
+      /* ---------- Estado del reporte ---------- */
+      function ponerEstado(estado) {
+        el.frame.dataset.state = estado;
+        el.estado.dataset.state = estado;
+        if (estado === "loading") el.estadoTxt.textContent = "Cargando reporte";
+        if (estado === "error") el.estadoTxt.textContent = "Sin conexión con el reporte";
+        if (estado === "ready") {
+          const hora = new Intl.DateTimeFormat("es-MX", { hour: "2-digit", minute: "2-digit" }).format(new Date());
+          el.estadoTxt.textContent = "Cargado a las " + hora;
+        }
+      }
+
+      function cargar(rep, opciones) {
+        const recarga = !!(opciones && opciones.recarga);
+        actual = rep;
+        memoria.guardar("portal-ultimo", rep.id);
+        document.title = rep.nombre + " | Ventas";
+        el.titulo.textContent = rep.nombre;
+        el.subtitulo.textContent = rep.descripcion || rep.grupo || "";
+        el.iframe.title = rep.nombre;
+        el.btnOpen.href = rep.url;
+        el.btnOpenError.href = rep.url;
+        marcarMenu();
+        ponerEstado("loading");
+
+        clearTimeout(temporizador);
+        temporizador = setTimeout(() => ponerEstado("error"), TIEMPO_MAXIMO_MS);
+
+        if (recarga) {
+          el.iframe.src = "about:blank";
+          setTimeout(() => { el.iframe.src = rep.url; }, 60);
+        } else {
+          el.iframe.src = rep.url;
+        }
+      }
+
+      el.iframe.addEventListener("load", () => {
+        if (!actual || el.iframe.getAttribute("src") !== actual.url) return;   // ignora about:blank
+        clearTimeout(temporizador);
+        ponerEstado("ready");
+        if (avisarAlCargar) {
+          avisarAlCargar = false;
+          avisar("Reporte actualizado");
+        }
+      });
+
+      function actualizar() {
+        if (!actual) return;
+        avisarAlCargar = true;
+        cargar(actual, { recarga: true });
+      }
+
+      function reporteDesdeHash() {
+        const id = decodeURIComponent(location.hash.slice(1));
+        return REPORTES.find((r) => r.id === id) ||
+               REPORTES.find((r) => r.id === memoria.leer("portal-ultimo")) ||
+               REPORTES[0];
+      }
+
+      /* ---------- Pantalla completa ---------- */
+      function alternarPantallaCompleta() {
+        const f = el.frame;
+        const activa = document.fullscreenElement || document.webkitFullscreenElement;
+        if (activa) {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        } else if (f.requestFullscreen) {
+          f.requestFullscreen().catch(() => avisar("Tu navegador no permitió la pantalla completa"));
+        } else if (f.webkitRequestFullscreen) {
+          f.webkitRequestFullscreen();
+        } else {
+          avisar("Tu navegador no permite la pantalla completa");
+        }
+      }
+
+      function alCambiarPantalla() {
+        const activa = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        el.btnExit.hidden = !activa;
+      }
+
+      /* ---------- Tema ---------- */
+      function aplicarTema(tema) {
+        document.documentElement.dataset.theme = tema;
+        el.btnTheme.setAttribute("aria-pressed", String(tema === "dark"));
+      }
+
+      function iniciarTema() {
+        const guardado = memoria.leer("portal-tema");
+        const oscuro = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        aplicarTema(guardado || (oscuro ? "dark" : "light"));
+      }
+
+      function alternarTema() {
+        const nuevo = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        aplicarTema(nuevo);
+        memoria.guardar("portal-tema", nuevo);
+      }
+
+      /* ---------- Menú lateral ---------- */
+      function alternarRiel() {
+        const contraido = el.app.classList.toggle("is-collapsed");
+        el.btnCollapse.setAttribute("aria-label", contraido ? "Expandir menú" : "Contraer menú");
+        memoria.guardar("portal-riel", contraido ? "1" : "0");
+      }
+
+      function abrirMenuMovil() { el.app.classList.add("menu-open"); }
+      function cerrarMenuMovil() { el.app.classList.remove("menu-open"); }
+
+      /* ---------- Aviso breve ---------- */
+      let ocultarAviso = null;
+      function avisar(texto) {
+        el.toast.textContent = texto;
+        el.toast.classList.add("is-visible");
+        clearTimeout(ocultarAviso);
+        ocultarAviso = setTimeout(() => el.toast.classList.remove("is-visible"), 2400);
+      }
+
+      /* ---------- Eventos ---------- */
+      el.btnRefresh.addEventListener("click", actualizar);
+      el.btnRetry.addEventListener("click", actualizar);
+      el.btnFull.addEventListener("click", alternarPantallaCompleta);
+      el.btnExit.addEventListener("click", alternarPantallaCompleta);
+      el.btnTheme.addEventListener("click", alternarTema);
+      el.btnCollapse.addEventListener("click", alternarRiel);
+      el.btnMenu.addEventListener("click", abrirMenuMovil);
+      el.scrim.addEventListener("click", cerrarMenuMovil);
+
+      el.buscar.addEventListener("input", dibujarMenu);
+      el.buscar.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && el.buscar.value) {
+          e.stopPropagation();
+          el.buscar.value = "";
+          dibujarMenu();
+        }
+      });
+
+      document.addEventListener("fullscreenchange", alCambiarPantalla);
+      document.addEventListener("webkitfullscreenchange", alCambiarPantalla);
+      window.addEventListener("hashchange", () => { cerrarMenuMovil(); cargar(reporteDesdeHash()); });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const t = e.target;
+        if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        const tecla = e.key.toLowerCase();
+        if (tecla === "f") alternarPantallaCompleta();
+        else if (tecla === "r") actualizar();
+        else if (e.key === "/") {
+          e.preventDefault();
+          if (el.app.classList.contains("is-collapsed")) alternarRiel();
+          abrirMenuMovil();
+          el.buscar.focus();
+        } else if (e.key === "Escape") cerrarMenuMovil();
+      });
+
+      /* ---------- Inicio ---------- */
+      iniciarTema();
+      if (memoria.leer("portal-riel") === "1") {
+        el.app.classList.add("is-collapsed");
+        el.btnCollapse.setAttribute("aria-label", "Expandir menú");
+      }
+      cargar(reporteDesdeHash());
+      dibujarMenu();
+    })();
+  </script>
+</body>
+</html>
