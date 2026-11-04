@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Compras | Data Analytics</title>
+  <title>Ventas | Data Analytics</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232B59FF'/%3E%3Crect x='7' y='15' width='4' height='10' rx='1.5' fill='white'/%3E%3Crect x='14' y='8' width='4' height='17' rx='1.5' fill='white'/%3E%3Crect x='21' y='12' width='4' height='13' rx='1.5' fill='white'/%3E%3C/svg%3E">
 
   <!-- Tipografía: si no hay internet, el navegador usa la fuente del sistema -->
@@ -411,7 +411,7 @@
           <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.2" height="9" rx="1.4"/><rect x="9.9" y="3" width="4.2" height="18" rx="1.4"/><rect x="16.8" y="8" width="4.2" height="13" rx="1.4"/></svg>
         </span>
         <span class="brand-text">
-          <span class="brand-name">Compras</span>
+          <span class="brand-name">Ventas</span>
           <span class="brand-sub">Data Analytics</span>
         </span>
       </div>
@@ -510,39 +510,103 @@
          ====================================================== */
       const REPORTES = [
         {
-          id: "calendario",
-          nombre: "Calendario",
-          sigla: "CA",
-          grupo: "Compras",
-          url: "https://somoseltoro.github.io/compras-calendario/"
+          id: "colgate",
+          nombre: "Colgate",
+          sigla: "CG",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiNDAzZThmMDItNGRkYS00YjE5LTkzM2UtZmI4YTk1OTkyY2ZlIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
         },
         {
-          id: "pb-indicadores",
-          nombre: "PB INDICADORES",
-          sigla: "PI",
-          grupo: "Compras",
-          url: "https://app.powerbi.com/view?r=eyJrIjoiYjc3YTAyZmItNWVhNi00MmQ0LWJjZWQtYjJlMmFkZGRiNWJhIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+          id: "morena",
+          nombre: "La Morena",
+          sigla: "LM",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiZmU0ODVhYjUtMDM5OS00OTI4LWIyNWYtYmFjZTkzNWEyNmJjIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
         },
         {
-          id: "dashboard-temporalidades",
-          nombre: "Dashboard Temporalidades2.0",
-          sigla: "DT",
-          grupo: "Compras",
-          url: "https://app.powerbi.com/view?r=eyJrIjoiNTM4YjA5NDItYTJlNC00NDVjLTg0ZDEtMTA4YzNkYjhlZGE0IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+          id: "alen",
+          nombre: "Alen",
+          sigla: "AL",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiM2NhNjIxNTUtMzU4Ny00ZGViLWIyNzktZTNmMDAyZDdkNmQ2IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
         },
         {
-          id: "presupuesto-compras",
-          nombre: "Dash_PresupuestoCompras",
-          sigla: "PC",
-          grupo: "Compras",
-          url: "https://app.powerbi.com/view?r=eyJrIjoiYjYyMWVkNDktMDJhOS00MzRiLWE4MDAtNWMyMDhiMWYwZWY2IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+          id: "kelloggs",
+          nombre: "Kelloggs",
+          sigla: "KE",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiNjA4NDJhNTEtZTFjNi00OGViLThhZWYtZDkwZDg1N2UxMDJiIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
         },
         {
-          id: "calendario-pagos",
-          nombre: "Calendario Pagos",
-          sigla: "CP",
-          grupo: "Compras",
-          url: "https://app.powerbi.com/view?r=eyJrIjoiZGNmOGZjNWUtNTBhNC00ZDBjLWIwZTUtMzhjZGMzNWM0N2Y2IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+          id: "unilever",
+          nombre: "Unilever",
+          sigla: "UN",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiY2Y5ZGEzNTItMmQzYy00MGNkLWFjYWEtYWMzNTNjMmNiODRlIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "pg",
+          nombre: "P&G",
+          sigla: "PG",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiMzIyYmE5NzAtNjgyMC00YTlhLTlmZDAtMDY4MTM0YWNiMTNjIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "rh-mj",
+          nombre: "RH y MJ",
+          sigla: "RM",
+          grupo: "Proveedores",
+          descripcion: "Reckitt Higiene y Mead Johnson",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiN2Y1ZTA2M2YtOTlhZi00N2U0LWExZjgtNTE0NDI4ZDgzODhjIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "flora",
+          nombre: "Flora",
+          sigla: "FL",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiNWFjN2QwY2EtYmEyMS00ZWViLTkwOTItOTBmNGJjYTY1OTE2IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "conagra",
+          nombre: "Conagra",
+          sigla: "CN",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiZTI5YjBlZTUtNjg3Ny00Yjg3LWEwZWYtNjQ1Njg1YzBiOGZhIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "johnson",
+          nombre: "Johnson",
+          sigla: "JO",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiZWQ5MGZiNjAtYmMzMS00ZDEwLWJmOWEtNjJlM2Q0MjZiYjZmIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "arcor",
+          nombre: "Arcor",
+          sigla: "AR",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiOTU3ZmIwYzUtMjA5MS00OGUwLThmZWUtYmY5NjRlOGMwNjZhIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "quala",
+          nombre: "Quala",
+          sigla: "QU",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiYTFlZDMxYWYtNDEzZi00NGU2LWIwY2ItNTgwNzllMWE3MGE5IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "la-botanera",
+          nombre: "La Botanera",
+          sigla: "LB",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiYzYyMjZhNTUtYTZkMy00ZGIyLTkwMDctMWMwZWU1ZmY1YjFiIiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
+        },
+        {
+          id: "softys",
+          nombre: "Softys",
+          sigla: "SO",
+          grupo: "Proveedores",
+          url: "https://app.powerbi.com/view?r=eyJrIjoiZjVlMzMyNWUtMjA0MC00YmU4LTkzNDYtNWQzNDRhNmJjMTk1IiwidCI6ImFhODFiNGU2LTllMTMtNDUxNC1iNzkwLTY1YWUyNDZlZjExZiIsImMiOjR9"
         }
       ];
 
@@ -656,7 +720,7 @@
         const recarga = !!(opciones && opciones.recarga);
         actual = rep;
         memoria.guardar("portal-ultimo", rep.id);
-        document.title = rep.nombre + " | Compras";
+        document.title = rep.nombre + " | Ventas";
         el.titulo.textContent = rep.nombre;
         el.subtitulo.textContent = rep.descripcion || rep.grupo || "";
         el.iframe.title = rep.nombre;
