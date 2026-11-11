@@ -397,6 +397,36 @@
       .status { display: none; }
     }
   </style>
+  <style id="red-dinamica">
+    /* Fondo dinámico: red de puntos animada */
+    body {
+      background-image:
+        radial-gradient(60% 260px at 12% 0%, rgba(43, 89, 255, .10), transparent 70%),
+        radial-gradient(45% 240px at 92% 0%, rgba(34, 211, 238, .08), transparent 70%);
+      background-repeat: no-repeat;
+    }
+    :root[data-theme="dark"] body {
+      background-image:
+        radial-gradient(60% 300px at 12% 0%, rgba(43, 89, 255, .30), transparent 70%),
+        radial-gradient(45% 260px at 92% 0%, rgba(34, 211, 238, .16), transparent 70%);
+    }
+    #redFondo {
+      position: fixed; top: 0; left: 0; width: 100%; height: 150px; z-index: 0;
+      pointer-events: none;
+      -webkit-mask-image: linear-gradient(#000 55%, transparent);
+              mask-image: linear-gradient(#000 55%, transparent);
+    }
+    .app { position: relative; z-index: 1; }       /* el contenido queda por encima de la red */
+    .rail { isolation: isolate; }
+    .rail-red {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1; pointer-events: none;
+    }
+    @media (min-width: 821px) {
+      .rail { position: relative; }
+      .rail-red { width: var(--rail-w); }          /* no cambia de tamaño al contraer el menú */
+    }
+  </style>
 </head>
 
 <body>
@@ -719,7 +749,7 @@
       function cargar(rep, opciones) {
         const recarga = !!(opciones && opciones.recarga);
         actual = rep;
-        memoria.guardar("portal-ultimo", rep.id);
+        memoria.guardar("ventas-ultimo", rep.id);
         document.title = rep.nombre + " | Ventas";
         el.titulo.textContent = rep.nombre;
         el.subtitulo.textContent = rep.descripcion || rep.grupo || "";
@@ -759,7 +789,7 @@
       function reporteDesdeHash() {
         const id = decodeURIComponent(location.hash.slice(1));
         return REPORTES.find((r) => r.id === id) ||
-               REPORTES.find((r) => r.id === memoria.leer("portal-ultimo")) ||
+               REPORTES.find((r) => r.id === memoria.leer("ventas-ultimo")) ||
                REPORTES[0];
       }
 
@@ -866,6 +896,135 @@
       }
       cargar(reporteDesdeHash());
       dibujarMenu();
+    })();
+  </script>
+  <script id="red-dinamica">
+    /* Red de puntos animada del fondo.
+       Se ve en la franja del encabezado y en el menú lateral. */
+    (function () {
+      "use strict";
+
+      /* Los puntos se mueven siempre, aunque Windows tenga desactivados los
+         "efectos de animación". Pon MOVER_SIEMPRE en false para que respeten
+         esa opción del sistema (en ese caso quedarían quietos). */
+      var MOVER_SIEMPRE = true;
+      var VELOCIDAD_PUNTOS = 1.7;   // 1 = suave, 1.7 = un poco más rápido, 2.5 = rápido
+      var ALTO_FRANJA = 150;        // alto, en px, de la franja del encabezado con puntos
+
+      var reducido = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+      var mover = MOVER_SIEMPRE || !reducido;
+      var ritmo = (reducido ? 0.6 : 1) * VELOCIDAD_PUNTOS;
+
+      function esOscuro() { return document.documentElement.getAttribute("data-theme") === "dark"; }
+      function pantallaCompleta() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+
+      function crearRed(lienzo, o) {
+        var ctx = lienzo.getContext && lienzo.getContext("2d");
+        if (!ctx) return;
+        var ancho = 0, alto = 0, nodos = [];
+        var cursor = { x: -9999, y: -9999 };
+
+        function medir() {
+          var caja = lienzo.getBoundingClientRect();
+          ancho = Math.round(caja.width); alto = Math.round(caja.height);
+          if (!ancho || !alto) return;
+          var dpr = Math.min(window.devicePixelRatio || 1, 2);
+          lienzo.width = Math.round(ancho * dpr); lienzo.height = Math.round(alto * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          var cantidad = Math.max(o.minimo, Math.min(o.maximo, Math.floor(ancho * alto / o.area)));
+          nodos = [];
+          for (var i = 0; i < cantidad; i++) {
+            nodos.push({
+              x: Math.random() * ancho, y: Math.random() * alto,
+              vx: (Math.random() - 0.5) * 0.45 * ritmo, vy: (Math.random() - 0.5) * 0.45 * ritmo,
+              r: Math.random() * 1.5 + 0.7
+            });
+          }
+        }
+
+        function dibujar() {
+          if (mover) requestAnimationFrame(dibujar);
+          if (pantallaCompleta() || !nodos.length) return;      // en pantalla completa no se gasta procesador
+          ctx.clearRect(0, 0, ancho, alto);
+          var pal = o.paleta(esOscuro());
+          for (var i = 0; i < nodos.length; i++) {
+            var p = nodos[i];
+            if (mover) {
+              p.x += p.vx; p.y += p.vy;
+              if (p.x < 0 || p.x > ancho) p.vx *= -1;
+              if (p.y < 0 || p.y > alto) p.vy *= -1;
+            }
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = pal.punto;
+            ctx.fill();
+
+            for (var j = i + 1; j < nodos.length; j++) {
+              var q = nodos[j];
+              var d = Math.sqrt((p.x - q.x) * (p.x - q.x) + (p.y - q.y) * (p.y - q.y));
+              if (d < o.distancia) {
+                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+                ctx.strokeStyle = "rgba(" + pal.linea + "," + ((1 - d / o.distancia) * pal.alfa).toFixed(3) + ")";
+                ctx.lineWidth = 0.8; ctx.stroke();
+              }
+            }
+
+            if (o.cursor) {                                       // los puntos cercanos se conectan al cursor
+              var dc = Math.sqrt((p.x - cursor.x) * (p.x - cursor.x) + (p.y - cursor.y) * (p.y - cursor.y));
+              if (dc < 190) {
+                ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(cursor.x, cursor.y);
+                ctx.strokeStyle = "rgba(" + pal.cursor + "," + ((1 - dc / 190) * 0.6).toFixed(3) + ")";
+                ctx.lineWidth = 1; ctx.stroke();
+              }
+            }
+          }
+        }
+
+        medir();
+        dibujar();
+        window.addEventListener("resize", function () { medir(); if (!mover) dibujar(); });
+        if (window.MutationObserver) {                            // si cambia el tema, se repinta con sus colores
+          new MutationObserver(function () { if (!mover) dibujar(); })
+            .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+        }
+        if (o.cursor) {
+          window.addEventListener("pointermove", function (e) {
+            var c = lienzo.getBoundingClientRect();
+            cursor.x = e.clientX - c.left; cursor.y = e.clientY - c.top;
+          });
+          window.addEventListener("pointerleave", function () { cursor.x = cursor.y = -9999; });
+        }
+      }
+
+      /* Franja del encabezado */
+      var franja = document.createElement("canvas");
+      franja.id = "redFondo";
+      franja.setAttribute("aria-hidden", "true");
+      franja.style.height = ALTO_FRANJA + "px";
+      document.body.insertBefore(franja, document.body.firstChild);
+      crearRed(franja, {
+        minimo: 10, maximo: 80, area: 9000, distancia: 150, cursor: true,
+        paleta: function (oscuro) {
+          return oscuro
+            ? { punto: "rgba(190,210,255,0.55)", linea: "150,175,255", alfa: 0.32, cursor: "94,234,212" }
+            : { punto: "rgba(43,89,255,0.50)", linea: "43,89,255", alfa: 0.26, cursor: "14,159,126" };
+        }
+      });
+
+      /* Menú lateral */
+      var riel = document.querySelector(".rail");
+      if (riel) {
+        var lienzoRiel = document.createElement("canvas");
+        lienzoRiel.className = "rail-red";
+        lienzoRiel.setAttribute("aria-hidden", "true");
+        riel.insertBefore(lienzoRiel, riel.firstChild);
+        crearRed(lienzoRiel, {
+          minimo: 10, maximo: 40, area: 9000, distancia: 110, cursor: false,
+          paleta: function () {
+            return { punto: "rgba(190,210,255,0.40)", linea: "150,175,255", alfa: 0.20, cursor: "94,234,212" };
+          }
+        });
+      }
     })();
   </script>
 </body>
